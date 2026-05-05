@@ -657,26 +657,6 @@
       display: none;
     }
 
-    /* ── Sign-out button ──────────────────────────────────── */
-    .signout-btn {
-      margin-left: auto;
-      flex-shrink: 0;
-      padding: 6px 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      background: transparent;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-    }
-
-    .signout-btn:hover {
-      background: var(--surface-hover);
-      border-color: var(--border-focus);
-    }
-
     @media (max-width: 900px) {
       .main-result.with-table {
         grid-template-columns: 1fr;
@@ -1186,8 +1166,12 @@
           authGate.hidden = true;
           appEl.style.display = '';
           if (!userButtonMounted) {
-            window.Clerk.mountUserButton(document.getElementById('header-user-button'));
-            window.Clerk.mountUserButton(document.getElementById('hero-user-button'));
+            const ubOptions = {
+              afterSignOutUrl: window.location.origin,
+              showName: true
+            };
+            window.Clerk.mountUserButton(document.getElementById('header-user-button'), ubOptions);
+            window.Clerk.mountUserButton(document.getElementById('hero-user-button'), ubOptions);
             userButtonMounted = true;
           }
         } else {
