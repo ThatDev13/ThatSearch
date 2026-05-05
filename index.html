@@ -771,7 +771,8 @@
     </main>
 
     <footer class="site-footer">
-      ThatSearch for Students &mdash; Powered by Wikipedia
+      ThatSearch for Students &mdash; Powered by Wikipedia &mdash;
+      <a href="/daten" style="color:inherit;text-decoration:underline;">Datenschutz</a>
     </footer>
   </div>
 
@@ -1168,7 +1169,7 @@
           if (!userButtonMounted) {
             const ubOptions = {
               afterSignOutUrl: window.location.origin,
-              showName: true
+              showName: false
             };
             window.Clerk.mountUserButton(document.getElementById('header-user-button'), ubOptions);
             window.Clerk.mountUserButton(document.getElementById('hero-user-button'), ubOptions);
