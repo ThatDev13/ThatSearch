@@ -802,8 +802,11 @@
       wikipediaResult.hidden = false;
 
       const sourceCount = new Set([main, ...related].map(item => item.sourceName)).size;
+      const resultCount = [main, ...related].length;
+      const resultLabel = resultCount === 1 ? 'Ergebnis' : 'Ergebnisse';
+      const sourceLabel = sourceCount === 1 ? 'Quelle' : 'Quellen';
       headerSearchInput.value = query;
-      resultsCount.textContent = [main, ...related].length + ' Ergebnisse aus ' + sourceCount + ' Quellen für „' + query + '"';
+      resultsCount.textContent = resultCount + ' ' + resultLabel + ' aus ' + sourceCount + ' ' + sourceLabel + ' für „' + query + '"';
       resultText.innerHTML = highlightImportant([main.title, main.text].filter(Boolean).join(' — '), query);
       sourceLink.href = main.url;
       sourceLink.textContent = main.sourceName + ' öffnen ↗';
@@ -1078,10 +1081,11 @@
 
     function withTimeout(promise, timeoutMs = 1500) {
       let timeoutId = null;
+      const safePromise = Promise.resolve(promise).catch(() => []);
       const timeoutPromise = new Promise(resolve => {
         timeoutId = window.setTimeout(() => resolve([]), timeoutMs);
       });
-      return Promise.race([promise, timeoutPromise]).finally(() => {
+      return Promise.race([safePromise, timeoutPromise]).finally(() => {
         if (timeoutId !== null) window.clearTimeout(timeoutId);
       });
     }
@@ -1206,6 +1210,8 @@
         btn.addEventListener('click', () => {
           if (window.Clerk && typeof window.Clerk.openSignIn === 'function') {
             window.Clerk.openSignIn({});
+          } else {
+            setSearchState('Anmeldung wird noch geladen …');
           }
         });
         return btn;
