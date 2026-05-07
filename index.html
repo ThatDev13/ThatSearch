@@ -655,6 +655,7 @@
     let autocompleteRequestId = 0;
     let autocompleteDebounce = null;
     const BLUR_DELAY_MS = 150;
+    const languageToolCorrectionsCache = new Map();
 
     // ── Helpers ─────────────────────────────────────────────
     function sanitizeText(text) {
@@ -1093,6 +1094,9 @@
     async function correctQueryWithLanguageTool(query) {
       const cleanedQuery = sanitizeText(query);
       if (!cleanedQuery) return { correctedQuery: cleanedQuery, wasCorrected: false };
+      const cacheKey = cleanedQuery.toLowerCase();
+      const cachedCorrection = languageToolCorrectionsCache.get(cacheKey);
+      if (cachedCorrection) return cachedCorrection;
 
       try {
         const response = await fetch('https://api.languagetool.org/v2/check', {
@@ -1128,12 +1132,17 @@
           });
 
         correctedQuery = sanitizeText(correctedQuery);
-        return {
+        const correction = {
           correctedQuery,
           wasCorrected: correctedQuery.toLowerCase() !== cleanedQuery.toLowerCase()
         };
-      } catch {
-        return { correctedQuery: cleanedQuery, wasCorrected: false };
+        languageToolCorrectionsCache.set(cacheKey, correction);
+        return correction;
+      } catch (error) {
+        console.error('LanguageTool-Korrektur fehlgeschlagen:', error);
+        const fallbackCorrection = { correctedQuery: cleanedQuery, wasCorrected: false };
+        languageToolCorrectionsCache.set(cacheKey, fallbackCorrection);
+        return fallbackCorrection;
       }
     }
 
@@ -1186,7 +1195,7 @@
         const [main, ...related] = sourceResults;
         showSearchResult(main, related.slice(0, 10), effectiveQuery);
         if (correction.wasCorrected) {
-          setSearchState('Eingabe korrigiert: „' + originalQuery + '“ → „' + effectiveQuery + '“.');
+          setSearchState(`Eingabe korrigiert: „${originalQuery}“ → „${effectiveQuery}“.`);
         } else {
           setSearchState('');
         }
